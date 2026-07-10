@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Money Control</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .mcDivider{height:1px;background:rgba(148,163,184,.35);margin:10px 0}
+    .mcMsgCard{margin-top:12px}
+    .mcMsgRow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .mcMsgRow select,.mcMsgRow input{min-height:40px}
+    .mcSmall{display:block;margin-top:8px;opacity:.8;font-size:.85rem}
+  </style>
+</head>
+
+<body data-page="home">
+  <div id="pinOverlay" class="backdrop hidden" style="z-index: 9999; background: var(--bg2);">
+    <div class="modal" style="background: transparent; border: none; box-shadow: none;">
+      <div style="text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+        <h2 id="pinTitle" style="margin: 0 0 20px 0;">Enter PIN</h2>
+        
+        <div id="pinDots" style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
+          <div class="pinDot"></div><div class="pinDot"></div><div class="pinDot"></div><div class="pinDot"></div>
+        </div>
+
+        <div class="pinPad">
+          <button class="pinBtn">1</button><button class="pinBtn">2</button><button class="pinBtn">3</button>
+          <button class="pinBtn">4</button><button class="pinBtn">5</button><button class="pinBtn">6</button>
+          <button class="pinBtn">7</button><button class="pinBtn">8</button><button class="pinBtn">9</button>
+          <button class="pinBtn" id="pinClear">C</button><button class="pinBtn">0</button><button class="pinBtn" id="pinClose" style="font-size:16px;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="mcTop">
+    <div class="mcTopLeft">
+      <div class="mcAppIcon">₹</div>
+      <div>
+        <div class="mcTitle">Money Control</div>
+        <div class="mcSub">People • Ledger • Offline</div>
+      </div>
+    </div>
+
+    <div class="mcTopRight">
+      <button id="themeToggle" class="mcIconBtn" type="button">🌙</button>
+      <button id="exportBackupBtn" class="mcIconBtn" type="button">⤓</button>
+      <button id="importBackupBtn" class="mcIconBtn" type="button">⤒</button>
+      <button id="setPinBtn" class="mcIconBtn" type="button">🔒</button>
+    </div>
+  </header>
+
+  <main class="mcWrap">
+    <section class="mcNetCard" id="netCard">
+      <div class="mcNetLeft">
+        <div class="mcNetTitle">Net Balance</div>
+        <div class="mcNetMeta"><span id="accountsCount">0</span> Accounts</div>
+      </div>
+      <div class="mcNetRight">
+        <div id="netAmount" class="mcNetAmount">₹0</div>
+        <div id="netLabel" class="mcNetLabel">Settled</div>
+      </div>
+    </section>
+
+    <input id="searchPeople" class="mcSearch" placeholder="Search person..." />
+    <section id="peopleList" class="mcList"></section>
+  </main>
+
+  <input id="importFile" type="file" accept="application/json" class="hidden" />
+
+  <button id="fabAdd" class="mcFab" type="button">
+    <span class="mcFabPlus">＋</span>
+    <span class="mcFabText">Add Customer</span>
+  </button>
+
+  <div id="modalBackdrop" class="backdrop hidden"></div>
+
+  <div id="personModal" class="modal hidden">
+    <div class="modalHeader">
+      <h3 id="modalTitle">Add New Person</h3>
+      <button id="modalClose" class="iconX" type="button">×</button>
+    </div>
+
+    <div class="modalBody">
+      <label class="field">
+        <span>Name</span>
+        <input id="personNameInput" class="input" placeholder="e.g., Mohit" />
+      </label>
+
+      <div class="mcDivider"></div>
+
+      <div class="mcMsgCard">
+        <label class="field" style="display:flex;gap:10px;align-items:center;">
+          <input type="checkbox" id="sendMsg" />
+          <span>Send message after saving entry</span>
+        </label>
+
+        <div id="msgBox" style="display:none;margin-top:10px;">
+          <div class="mcMsgRow">
+            <select id="msgMethod" class="input">
+              <option value="sms">SMS</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="share">Share</option>
+            </select>
+
+            <input
+              id="phone"
+              class="input"
+              type="tel"
+              placeholder="Phone number (e.g. 9876543210)"
+            />
+
+            <button type="button" id="pickContactBtn" class="btn">Pick Contact</button>
+          </div>
+
+          <small class="mcSmall">
+            Contact picker sab devices me support nahi karta.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="modalFooter">
+      <button id="modalCancel" class="btn" type="button">Cancel</button>
+      <button id="modalSave" class="btn primary" type="button">Save</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const sendMsg = document.getElementById("sendMsg");
+      const msgBox = document.getElementById("msgBox");
+
+      if (sendMsg && msgBox) {
+        sendMsg.addEventListener("change", () => {
+          msgBox.style.display = sendMsg.checked ? "block" : "none";
+        });
+      }
+    });
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .then(() => console.log("Service Worker Registered"))
+          .catch(err => console.log("SW Error:", err));
+      });
+    }
+  </script>
+
+</body>
+</html>

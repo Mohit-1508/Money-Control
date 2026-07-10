@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.mohit_1508.twa",
+      "sha256_cert_fingerprints": [
+        "24:4D:6D:D7:28:46:0E:ED:59:65:EF:8C:F7:87:14:0D:33:38:C2:86:59:3C:24:48:C5:24:DF:7F:A5:BB:58:B7"
+      ]
+    }
+  }
+]

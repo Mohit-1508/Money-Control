@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Ledger</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body data-page="chat">
+  <!-- Security PIN Overlay -->
+  <div id="pinOverlay" class="backdrop hidden" style="z-index: 9999; background: var(--bg2);">
+    <div class="modal" style="background: transparent; border: none; box-shadow: none;">
+      <div style="text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+        <h2 id="pinTitle" style="margin: 0 0 20px 0;">Enter PIN</h2>
+        
+        <!-- The 4 Dots -->
+        <div id="pinDots" style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
+          <div class="pinDot"></div><div class="pinDot"></div><div class="pinDot"></div><div class="pinDot"></div>
+        </div>
+
+        <!-- The Keypad -->
+        <div class="pinPad">
+          <button class="pinBtn">1</button><button class="pinBtn">2</button><button class="pinBtn">3</button>
+          <button class="pinBtn">4</button><button class="pinBtn">5</button><button class="pinBtn">6</button>
+          <button class="pinBtn">7</button><button class="pinBtn">8</button><button class="pinBtn">9</button>
+          <button class="pinBtn" id="pinClear">C</button><button class="pinBtn">0</button><button class="pinBtn" id="pinClose" style="font-size:16px;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="titlewrap chatHeader">
+      <button class="btn" type="button" onclick="history.back()">←</button>
+
+      <div class="chatHeadText">
+        <h1 id="chatTitle">Person</h1>
+        <p class="subtitle">
+          <span id="chatBalance">₹0</span>
+          <span id="chatHint" class="hintText"> • Settled</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="row wrap">
+      <button id="themeToggle" class="mcCircleBtn" type="button" aria-label="Toggle theme">
+        🌙
+      </button>
+      <button id="settleBtn" class="btn" type="button">Settle</button>
+      <button id="deletePersonBtn" class="btn danger" type="button">Delete</button>
+    </div>
+  </header>
+
+  <main class="container chatContainer">
+    <section class="card chatCard">
+
+      <!-- Summary chips -->
+      <div class="summaryBar">
+        <div class="chip green">
+          <div class="chipTitle">Given</div>
+          <div class="chipVal" id="sumGiven">₹0</div>
+        </div>
+
+        <div class="chip red">
+          <div class="chipTitle">Received</div>
+          <div class="chipVal" id="sumReceived">₹0</div>
+        </div>
+
+        <div class="chip">
+          <div class="chipTitle">This Month</div>
+          <div class="chipVal" id="sumThisMonth">₹0</div>
+        </div>
+      </div>
+
+      <!-- Chat list -->
+      <div id="chatList" class="chatList"></div>
+    </section>
+  </main>
+
+  <!-- Floating Add Transaction Button -->
+  <button id="fabTx" class="fab" type="button" aria-label="Add Transaction">+</button>
+
+  <!-- Modal: Add/Edit Transaction -->
+  <div id="txBackdrop" class="backdrop hidden" role="presentation"></div>
+
+  <div id="txModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="txTitle">
+    <div class="modalHeader">
+      <h3 id="txTitle">Add Entry</h3>
+      <button id="txClose" class="iconX" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="modalBody">
+      <label class="field">
+        <span>Amount (₹)</span>
+        <input id="txAmount" class="input" inputmode="numeric" placeholder="e.g., 500" />
+      </label>
+
+      <label class="field">
+        <span>Date</span>
+        <input id="txDate" class="input" type="date" />
+      </label>
+
+      <label class="field">
+        <span>Note (optional)</span>
+        <input id="txNote" class="input" placeholder="Optional" />
+      </label>
+
+      <div class="row wrap" style="margin-top:10px;">
+        <button id="btnGiven" class="btn" type="button"
+          style="border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.14);">
+          Given
+        </button>
+
+        <button id="btnReceived" class="btn" type="button"
+          style="border-color: rgba(239,68,68,.45); background: rgba(239,68,68,.12);">
+          Received
+        </button>
+      </div>
+
+      <p class="meta" style="margin-top:10px;">Tip: Long press any bubble to Edit/Delete.</p>
+    </div>
+
+    <div class="modalFooter">
+      <button id="txCancel" class="btn" type="button">Cancel</button>
+      <button id="txSave" class="btn primary" type="button">Save</button>
+    </div>
+  </div>
+
+  <!-- Modal: Long-press actions -->
+  <div id="actBackdrop" class="backdrop hidden" role="presentation"></div>
+
+  <div id="actModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+    <div class="modalHeader">
+      <h3 id="actTitle">Transaction</h3>
+      <button id="actClose" class="iconX" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="modalBody">
+      <p class="meta" id="actInfo">Choose action</p>
+    </div>
+
+    <div class="modalFooter" style="justify-content:space-between;">
+      <button id="actDelete" class="btn danger" type="button">Delete</button>
+
+      <div class="row">
+        <button id="actCancel" class="btn" type="button">Cancel</button>
+        <button id="actEdit" class="btn primary" type="button">Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
