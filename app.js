@@ -478,6 +478,7 @@ function initHome() {
   const exportBackupBtn = $("exportBackupBtn");
   const importBackupBtn = $("importBackupBtn");
   const importFile = $("importFile");
+  const exportCsvBtn = $("exportCsvBtn");
 
   function showModal() {
     if (!modal || !backdrop || !personNameInput) return;
