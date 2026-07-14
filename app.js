@@ -475,6 +475,7 @@ function initHome() {
   const modalSave = $("modalSave");
   const personNameInput = $("personNameInput");
 
+
   const exportBackupBtn = $("exportBackupBtn");
   const importBackupBtn = $("importBackupBtn");
   const importFile = $("importFile");
@@ -642,6 +643,51 @@ function initHome() {
   });
 
   searchPeople?.addEventListener("input", render);
+
+// --- NEW: Excel (CSV) Export Logic ---
+  exportCsvBtn?.addEventListener("click", () => {
+    const db = loadDB();
+    if (!db.people || db.people.length === 0) {
+      showToast("No data to export.", "error");
+      return;
+    }
+
+    // Create the headers for the spreadsheet
+    let csvContent = "Person,Date,Type,Amount (INR),Note\n";
+
+    let hasTransactions = false;
+
+    // Loop through everyone and grab their transactions
+    db.people.forEach(person => {
+      const name = (person.name || "Unknown").replace(/,/g, " "); // Remove commas so it doesn't break cells
+      
+      (person.transactions || []).forEach(tx => {
+        hasTransactions = true;
+        const date = tx.date || "";
+        const type = tx.type === "given" ? "Given" : "Received";
+        const amount = tx.amount || 0;
+        const note = (tx.note || "").replace(/,/g, " "); // Remove commas
+        
+        csvContent += `${name},${date},${type},${amount},${note}\n`;
+      });
+    });
+
+    if (!hasTransactions) {
+      showToast("No transactions found to export.", "error");
+      return;
+    }
+
+    // Create the downloadable spreadsheet file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Ledger_Export_${todayISO()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast("Excel Export successful! 📊", "success");
+  });
 
   exportBackupBtn?.addEventListener("click", () => {
     const db = loadDB();
